@@ -9,4 +9,6 @@ urlpatterns = [
     path('', views.gallery, name='gallery'),
     path('photo/<str:pk>/', views.viewPhoto, name='photo'),
     path('add/', views.addPhoto, name='add'),
+    path('delete/<int:photo_id>/', views.delete_photo, name='delete_photo'),
+    path('delete-category/<int:category_id>/', views.delete_category, name='delete-category'),
 ]

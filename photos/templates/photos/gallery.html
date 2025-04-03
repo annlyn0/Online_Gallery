@@ -1,41 +1,102 @@
 {% extends 'photos/base.html' %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
-    <style>
-        .image-thumbail {
-            height: 200px;
-            object-fit: cover;
-        }
+<style>
+  /* The container has a fixed size */
+  .image-thumbnail-container {
+      width: 100%;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f5f5f5; /* Optional: provides a background for empty areas */
+  }
 
-        .list-group-item a {
-            text-decoration: none;
-            color: black;
-        }
-    </style>
+  /* The image scales down or up to fit the container without distortion */
+  .image-thumbail {
+      max-width: 100%;
+      max-height: 100%;
+      /* Optionally center the image if it's smaller than the container */
+      display: block;
+  }
+
+  .list-group-item a {
+      text-decoration: none;
+      color: black;
+  }
+</style>
+
 
 {% block content %}
 
-    <div class="container-fluid mt-4">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-md-11">
-                <div class="row g-3"> <!-- Adjusts spacing between images -->
-                    {% for photo in photos %}
-                    <div class="col-lg-3 col-md-4 col-sm-6">
-                        <div class="card">
-                            <img class="image-thumbail" src="{{ photo.image.url }}" alt="Card image cap">
-                            <div class="card-body">
-                                <small>Category: {{ photo.category.name }}</small>
-                            </div>
-                            <a href="{% url 'photo' photo.id %}" class="btn btn-outline-dark btn-sm m-1">View</a>
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-11">
+            <div class="row g-3"> <!-- Adjusts spacing between images -->
+                {% for photo in photos %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card">
+                        <img class="image-thumbnail" src="{{ photo.image.url }}" alt="Card image cap" style="width: 100%; height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <small>Category: {{ photo.category.name }}</small>
                         </div>
+                        
+                        <!-- Buttons with slight spacing -->
+                        <div class="d-flex justify-content-center gap-2 p-2">
+                            <a href="{% url 'photo' photo.id %}" class="btn btn-outline-primary btn-sm" style="width: 100px;">View</a>
+                            <button class="delete-btn btn btn-outline-danger btn-sm" style="width: 100px;" data-photo-id="{{ photo.id }}">Delete</button>
+                        </div>
+                        
                     </div>
-                    {% empty %}
-                    <h3 class="text-center">No photos...</h3>
-                    {% endfor %}
                 </div>
+                {% empty %}
+                <h3 class="text-center">No photos...</h3>
+                {% endfor %}
             </div>
         </div>
     </div>
-    
-    {% endblock %}
+</div>
+
+
+<script>
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const photoId = this.getAttribute('data-photo-id');
+
+            // Show a confirmation alert before deleting
+            if (confirm("Are you sure you want to delete this photo? This action cannot be undone.")) {
+                fetch(`/delete/${photoId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to delete");
+                    }
+                    return response.json(); // Expecting a JSON response
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Photo deleted successfully!"); // Optional success message
+                        location.reload(); // Reload the page after successful deletion
+                    } else {
+                        alert("Failed to delete the photo.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Something went wrong. Please try again.");
+                });
+            } 
+        });
+    });
+</script>
+
+
+
+
+
+{% endblock %}

@@ -1,9 +1,43 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category, Photo
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
 from django.contrib import messages
+from django.http import JsonResponse
+
+
+# @login_required
+# def delete_photo(request, photo_id):
+#     photo = get_object_or_404(Photo, id=photo_id)
+
+#     if request.method == "POST":
+#         photo.delete()
+#         return redirect('gallery')  # Redirect back to gallery after deletion
+
+#     return render(request, 'photos/delete_confirm.html', {'photo': photo})
+@login_required
+def delete_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    
+    # Delete all photos in this category first
+    Photo.objects.filter(category=category).delete()
+    
+    # Delete the category
+    category.delete()
+
+    return redirect('gallery')
+
+@login_required
+def delete_photo(request, photo_id):
+    photo = get_object_or_404(Photo, id=photo_id)
+
+    if request.method == "POST":
+        photo.delete()
+        return JsonResponse({"success": True})  # Return JSON response
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 
 def loginUser(request):
@@ -23,21 +57,6 @@ def loginUser(request):
             messages.error(request, 'Invalid username or password')
 
     return render(request, 'photos/login_register.html', {'page': page})
-
-# def loginUser(request):
-#     page = 'login'
-#     if request.method == 'POST':
-#         username = request.POST['username']
-#         password = request.POST['password']
-
-#         user = authenticate(request, username=username, password=password)
-
-#         if user is not None:
-#             login(request, user)
-#             return redirect('gallery')
-
-#     return render(request, 'photos/login_register.html', {'page': page})
-
 
 def logoutUser(request):
     logout(request)
@@ -60,6 +79,7 @@ def registerUser(request):
 
     context = {'form': form, 'page': page}
     return render(request, 'photos/login_register.html', context)
+
 
 
 @login_required(login_url='login')
