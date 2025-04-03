@@ -50,8 +50,9 @@
                         {% endfor %}
                     </div>
                 </div>
-
+                
                 <a href="{% url 'add' %}" class="hover:text-gray-400">Upload</a>
+                <a href="http://127.0.0.1:8000/admin/" class="hover:text-gray-400">Admin</a>
                 <a href="{% url 'logout' %}" class="hover:text-gray-400">Log Out</a>
             </div>
         </div>
@@ -59,6 +60,7 @@
 
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="sm:hidden hidden bg-gray-900 text-white p-4">
+        <a href="http://127.0.0.1:8000/admin/" class="block py-2 px-4 hover:bg-gray-400">Admin</a>
         <a href="{% url 'gallery' %}" class="block py-2 px-4 hover:bg-gray-400">Home</a>
         <a href="{% url 'add' %}" class="block py-2 px-4 hover:bg-gray-400">Upload</a>
         <a href="{% url 'logout' %}" class="block py-2 px-4 hover:bg-gray-400">Log Out</a>
